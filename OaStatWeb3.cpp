@@ -134,7 +134,7 @@ void OaStatWeb3::onegame(std::string gamenumber) {
 	op.print(res,output);
 	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
 	res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
-			"FROM oastat_kills k, oastat_players p WHERE k.gamenumber = ? GROUP BY W ORDER BY C DESC"<<sgamenumber;
+			"FROM oastat_kills k, oastat_players p WHERE k.target = p.playerid AND k.gamenumber = ? GROUP BY W ORDER BY C DESC"<<sgamenumber;
 	output = "";
 	OutputterCtemplate op2("list.tpl");
     op2.addParameter("WEAPON",oaweapon);
