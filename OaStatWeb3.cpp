@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <boost/format.hpp>
 #include <ctemplate/template.h>
-#include <c++/4.6/iosfwd>
+//#include <c++/4.6/iosfwd>
 
 #include "Bases.hpp"
 #include "OutputterCtemplate.hpp"
