@@ -3,3 +3,4 @@
 {{#ELEMENT}}
 <tr><td>{{WEAPON}}</td><td>{{COUNT}}</td></tr>
 {{/ELEMENT}}
+</table>
