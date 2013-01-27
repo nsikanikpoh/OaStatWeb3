@@ -155,8 +155,8 @@ void OaStatWeb3::playerpage(std::string playerid) {
 	int sid = atoi(playerid.c_str());
 	CheckConnection();
 	ctemplate::TemplateDictionary body_tpl("body.tpl");
-	body_tpl.SetValue("TITLE","Game summary");
-	body_tpl.SetValue("SUBTITLE","Game - "+playerid);
+	body_tpl.SetValue("TITLE","Player page");
+	body_tpl.SetValue("SUBTITLE","Player - "+playerid);
 	body_tpl.SetValue("ROOTPATH","..");
 	
 	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
@@ -174,7 +174,7 @@ void OaStatWeb3::playerpage(std::string playerid) {
 	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
 	
 	res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
-			"FROM oastat_kills k, oastat_players p WHERE k.attacker = ? GROUP BY W ORDER BY C DESC"<<sid;
+			"FROM oastat_kills k WHERE k.attacker = ? GROUP BY W ORDER BY C DESC"<<sid;
 	output = "";
 	OutputterCtemplate op2("list.tpl");
     op2.addParameter("WEAPON",oaweapon);
