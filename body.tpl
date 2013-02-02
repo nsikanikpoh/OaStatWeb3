@@ -14,6 +14,7 @@
 </div>
 {{#BODY_ELEMENT_LIST}}
 <div id="element" >
+<h2>{{ELEMENT_TITLE}}</h2>
 {{BODY_ELEMENT}}
 </div>
 {{/BODY_ELEMENT_LIST}}
