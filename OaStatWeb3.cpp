@@ -1,9 +1,11 @@
 #include "OaStatWeb3.hpp"
-#include <cppcms/application.h>  
+#include <cppcms/application.h>
+//#include <ctemplate/template_dictionary.h>  
 #include <cppcms/service.h>  
 #include <cppcms/http_response.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/url_mapper.h>
+#include <ctemplate/template_dictionary.h>
 #include "boost/lexical_cast.hpp"
 #include <stdlib.h>
 #include <boost/format.hpp>
@@ -132,7 +134,9 @@ void OaStatWeb3::onegame(std::string gamenumber) {
 	op.addParameter("SCORE");
 	string output;
 	op.print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* end_score = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	end_score->SetValue("ELEMENT_TITLE","End score");
+	end_score->SetValue("BODY_ELEMENT",output);
 	res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
 			"FROM oastat_kills k, oastat_players p WHERE k.target = p.playerid AND k.gamenumber = ? GROUP BY W ORDER BY C DESC"<<sgamenumber;
 	output = "";
@@ -140,12 +144,20 @@ void OaStatWeb3::onegame(std::string gamenumber) {
     op2.addParameter("WEAPON",oaweapon);
     op2.addParameter("COUNT");
     op2.print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
-	
-	plot->gamescoregraph(sgamenumber);
-	stringstream ss;
-	ss << "<h2>Score graph</h2><img src=\"../media/scoretable" << sgamenumber << ".png\" alt=\"Scoregraph\"/>";
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",ss.str(),"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* most_kills = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	most_kills->SetValue("BODY_ELEMENT",output);
+	most_kills->SetValue("ELEMENT_TITLE","Most kills by weapon");
+	try {
+		plot->gamescoregraph(sgamenumber);
+		stringstream ss;
+		ss << "<img src=\"../media/scoretable" << sgamenumber << ".png\" alt=\"Scoregraph\"/>";
+		ctemplate::TemplateDictionary* score_graph = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+		score_graph->SetValue("BODY_ELEMENT",ss.str());
+		score_graph->SetValue("ELEMENT_TITLE","Score graph");
+	} 
+	catch (exception &e) {
+		cerr << e.what() << endl;
+	}
 	
 	string output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
@@ -154,12 +166,27 @@ void OaStatWeb3::onegame(std::string gamenumber) {
 void OaStatWeb3::playerpage(std::string playerid) {
 	int sid = atoi(playerid.c_str());
 	CheckConnection();
+	string nickname;
+	string output;
 	ctemplate::TemplateDictionary body_tpl("body.tpl");
 	body_tpl.SetValue("TITLE","Player page");
-	body_tpl.SetValue("SUBTITLE","Player - "+playerid);
+	//body_tpl.SetValue("SUBTITLE","Player - "+playerid);
 	body_tpl.SetValue("ROOTPATH","..");
-	
-	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
+	cppdb::result res = *sql<<"SELECT lastseen,isbot,model,headmodel,nickname FROM oastat_players WHERE playerid = ?"<<sid;
+	if(res.next()) {
+		string lastseen,isbot,model,headmodel;
+		res >> lastseen >> isbot >> model >> headmodel >> nickname;
+		ctemplate::TemplateDictionary player_tpl("player.tpl");
+		player_tpl.SetValue("lastseen",lastseen);
+		player_tpl.SetValue("isbot",isbot);
+		player_tpl.SetValue("model",model);
+		player_tpl.SetValue("headmodel",headmodel);
+		player_tpl.SetValue("nickname",nickname);
+		ctemplate::ExpandTemplate("player.tpl", ctemplate::DO_NOT_STRIP, &player_tpl, &output);
+		body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	}	
+	body_tpl.SetValue("SUBTITLE","Player - "+nickname);
+	res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
 			"WHERE 'X' = (SELECT DISTINCT 'X' FROM oastat_userinfo ui1 WHERE ui1.gamenumber = g.gamenumber AND ui1.player = ?) "
 			"ORDER BY g.time DESC LIMIT 10"<< sid;
 	OutputterCtemplate op("gamelist.tpl");
@@ -169,7 +196,7 @@ void OaStatWeb3::playerpage(std::string playerid) {
 	op.addParameter("BASEGAME");
 	op.addParameter("SERVERNAME");
 	op.addParameter("TIMESTAMP");
-	string output;
+	output = "";
 	op.print(res,output);
 	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
 	
@@ -192,6 +219,16 @@ void OaStatWeb3::mappage(std::string mapname) {
 	body_tpl.SetValue("TITLE","Map - " + mapname);
 	body_tpl.SetValue("SUBTITLE","Map summary");
 	body_tpl.SetValue("ROOTPATH","..");
+	string output2 = "";
+	cout << "Mapname: " << mapname << endl;
+	//Map info start
+	{
+		ctemplate::TemplateDictionary map_tpl("map.tpl");
+		map_tpl.SetValue("MAPNAME",mapname);
+		ctemplate::ExpandTemplate("map.tpl", ctemplate::DO_NOT_STRIP, &map_tpl, &output2);
+		body_tpl.SetValueAndShowSection("BODY_ELEMENT",output2,"BODY_ELEMENT_LIST");
+    }
+	//Map info end
 	//last 10 matches - start
 	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
 			"WHERE MAPNAME = ? ORDER BY g.time DESC LIMIT 10"<<mapname;
@@ -216,7 +253,7 @@ void OaStatWeb3::mappage(std::string mapname) {
     op->print(res,output);
 	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
 	//best weapons - end
-	string output2 = "";
+	output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
 };
