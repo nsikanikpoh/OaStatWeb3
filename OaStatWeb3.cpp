@@ -183,7 +183,9 @@ void OaStatWeb3::playerpage(std::string playerid) {
 		player_tpl.SetValue("headmodel",headmodel);
 		player_tpl.SetValue("nickname",nickname);
 		ctemplate::ExpandTemplate("player.tpl", ctemplate::DO_NOT_STRIP, &player_tpl, &output);
-		body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+		ctemplate::TemplateDictionary* player_info = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+		player_info->SetValue("BODY_ELEMENT",output);
+		player_info->SetValue("ELEMENT_TITLE","Info");
 	}	
 	body_tpl.SetValue("SUBTITLE","Player - "+nickname);
 	res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
@@ -198,7 +200,9 @@ void OaStatWeb3::playerpage(std::string playerid) {
 	op.addParameter("TIMESTAMP");
 	output = "";
 	op.print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* recent_games = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	recent_games->SetValue("ELEMENT_TITLE","Recent games");
+	recent_games->SetValue("BODY_ELEMENT",output);
 	
 	res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
 			"FROM oastat_kills k WHERE k.attacker = ? GROUP BY W ORDER BY C DESC"<<sid;
@@ -207,7 +211,9 @@ void OaStatWeb3::playerpage(std::string playerid) {
     op2.addParameter("WEAPON",oaweapon);
     op2.addParameter("COUNT");
     op2.print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* most_kills = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	most_kills->SetValue("ELEMENT_TITLE","Most kills by weapon");
+	most_kills->SetValue("BODY_ELEMENT",output);
 	
 	string output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
