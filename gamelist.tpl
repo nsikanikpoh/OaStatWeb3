@@ -1,3 +1,4 @@
+{{%AUTOESCAPE context="HTML"}}
 <table border="1">
 <tr><td>Game number</td><td>Gametype</td><td>Map name</td><td>Mod name</td><td>Server name</td><td>Start time</td></tr>
 {{#ELEMENT}}

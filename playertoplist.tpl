@@ -1,3 +1,4 @@
+{{%AUTOESCAPE context="HTML"}}
 <table border="1">
 <tr><td>Player</td><td>Score</td></tr>
 {{#ELEMENT}}

@@ -1,4 +1,4 @@
-
+{{%AUTOESCAPE context="HTML"}}
 <html>
 <head>
 <title>{{TITLE}} - {{SUBTITLE}}</title>
@@ -15,7 +15,7 @@
 {{#BODY_ELEMENT_LIST}}
 <div id="element" >
 <h2>{{ELEMENT_TITLE}}</h2>
-{{BODY_ELEMENT}}
+{{BODY_ELEMENT:none}}
 </div>
 {{/BODY_ELEMENT_LIST}}
 </center>
