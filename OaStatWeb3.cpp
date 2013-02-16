@@ -75,7 +75,10 @@ void OaStatWeb3::summary() {
     op->addParameter("COUNT");
 	string output;
     op->print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* weapon_kills = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	weapon_kills->SetValue("ELEMENT_TITLE","Kill types");
+	weapon_kills->SetValue("BODY_ELEMENT",output);
 	string output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
@@ -101,7 +104,10 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	op->addParameter("TIMESTAMP");
 	string output;
 	op->print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	body_element->SetValue("ELEMENT_TITLE","Game list");
+	body_element->SetValue("BODY_ELEMENT",output);
 	stringstream gamelist_stream;
 	gamelist_stream.str(std::string());
 	gamelist_stream.clear();
@@ -110,7 +116,10 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	{
 		gamelist_stream << "<a href='" << url("/gamelist",i*limitCount)  << "'>" << i+1  <<"</a> ";
 	}
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",gamelist_stream.str(),"BODY_ELEMENT_LIST");
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",gamelist_stream.str(),"BODY_ELEMENT_LIST");
+	body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	body_element->SetValue("ELEMENT_TITLE","Pages");
+	body_element->SetValue("BODY_ELEMENT",gamelist_stream.str());
 	string output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
@@ -232,7 +241,10 @@ void OaStatWeb3::mappage(std::string mapname) {
 		ctemplate::TemplateDictionary map_tpl("map.tpl");
 		map_tpl.SetValue("MAPNAME",mapname);
 		ctemplate::ExpandTemplate("map.tpl", ctemplate::DO_NOT_STRIP, &map_tpl, &output2);
-		body_tpl.SetValueAndShowSection("BODY_ELEMENT",output2,"BODY_ELEMENT_LIST");
+		//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output2,"BODY_ELEMENT_LIST");
+		ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+		body_element->SetValue("ELEMENT_TITLE","Map information");
+		body_element->SetValue("BODY_ELEMENT",output2);
     }
 	//Map info end
 	//last 10 matches - start
@@ -247,7 +259,10 @@ void OaStatWeb3::mappage(std::string mapname) {
 	op->addParameter("TIMESTAMP");
 	string output;
 	op->print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	body_element->SetValue("ELEMENT_TITLE","Recent games on map");
+	body_element->SetValue("BODY_ELEMENT",output);
 	//last 10 matches - end
 	//best weapons - start
 	res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
@@ -257,7 +272,10 @@ void OaStatWeb3::mappage(std::string mapname) {
     op->addParameter("COUNT");
 	output = "";
     op->print(res,output);
-	body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	body_element->SetValue("ELEMENT_TITLE","Most kills by weapon");
+	body_element->SetValue("BODY_ELEMENT",output);
 	//best weapons - end
 	output2 = "";
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
