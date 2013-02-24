@@ -33,6 +33,8 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 	dispatcher().assign("/player/(\\d+)", &OaStatWeb3::playerpage, this, 1);
     mapper().assign("player","/player/{1}");
 	
+	dispatcher().assign("/gametype/(\\d+)", &OaStatWeb3::gametypepage, this, 1);
+	mapper().assign("gametype","/gametype/{1}");
 	
 	dispatcher().assign("/", &OaStatWeb3::summary, this);
     mapper().assign("/");
@@ -41,6 +43,7 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 	
 	CheckConnection();
 	oaweapon = optconverter(new OaWeaponConverter());
+	oagametype = optconverter(new OaGametypeConverter());
 	plot = boost::shared_ptr<plotgenerator>(new plotgenerator(sql));
 }
 
@@ -93,11 +96,12 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	body_tpl.SetValue("SUBTITLE","Page");
 	body_tpl.SetValue("ROOTPATH","..");
 	int limitStart = atoi(startCount.c_str());
-	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
+	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
 			"WHERE 1 ORDER BY g.time DESC LIMIT ? OFFSET ?"<< limitCount << limitStart;
 	optoutputter op(new OutputterCtemplate("gamelist.tpl") );
 	op->addParameter("GAMENUMBER");
 	op->addParameter("GAMETYPE");
+	op->addParameter("GAMETYPE_NAME",oagametype);
 	op->addParameter("MAPNAME");
 	op->addParameter("BASEGAME");
 	op->addParameter("SERVERNAME");
@@ -197,12 +201,13 @@ void OaStatWeb3::playerpage(std::string playerid) {
 		player_info->SetValue("ELEMENT_TITLE","Info");
 	}	
 	body_tpl.SetValue("SUBTITLE","Player - "+nickname);
-	res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
+	res = *sql<<"SELECT g.gamenumber,g.gametype,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
 			"WHERE 'X' = (SELECT DISTINCT 'X' FROM oastat_userinfo ui1 WHERE ui1.gamenumber = g.gamenumber AND ui1.player = ?) "
 			"ORDER BY g.time DESC LIMIT 10"<< sid;
 	OutputterCtemplate op("gamelist.tpl");
 	op.addParameter("GAMENUMBER");
 	op.addParameter("GAMETYPE");
+	op.addParameter("GAMETYPE_NAME",oagametype);
 	op.addParameter("MAPNAME");
 	op.addParameter("BASEGAME");
 	op.addParameter("SERVERNAME");
@@ -228,6 +233,7 @@ void OaStatWeb3::playerpage(std::string playerid) {
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
 };
+
 void OaStatWeb3::mappage(std::string mapname) {
 	CheckConnection();
 	ctemplate::TemplateDictionary body_tpl("body.tpl");
@@ -248,11 +254,12 @@ void OaStatWeb3::mappage(std::string mapname) {
     }
 	//Map info end
 	//last 10 matches - start
-	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
+	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
 			"WHERE MAPNAME = ? ORDER BY g.time DESC LIMIT 10"<<mapname;
 	optoutputter op(new OutputterCtemplate("gamelist.tpl") );
 	op->addParameter("GAMENUMBER");
 	op->addParameter("GAMETYPE");
+	op->addParameter("GAMETYPE_NAME",oagametype);
 	op->addParameter("MAPNAME");
 	op->addParameter("BASEGAME");
 	op->addParameter("SERVERNAME");
@@ -281,6 +288,37 @@ void OaStatWeb3::mappage(std::string mapname) {
     ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
 };
+
+void OaStatWeb3::gametypepage(std::string gametypeNumber) {
+	int gametype = atoi(gametypeNumber.c_str());
+	CheckConnection();
+	ctemplate::TemplateDictionary body_tpl("body.tpl");
+	body_tpl.SetValue("TITLE",oagametype->getValue(gametypeNumber));
+	body_tpl.SetValue("SUBTITLE","Gametype summary");
+	body_tpl.SetValue("ROOTPATH","..");
+	string output2 = "";
+	//last 10 matches - start
+	cppdb::result res = *sql<<"SELECT g.gamenumber,g.gametype,g.gametype, g.mapname, g.basegame,g.servername,g.time FROM oastat_games g "
+			"WHERE g.gametype = ? ORDER BY g.time DESC LIMIT 10"<<gametype;
+	optoutputter op(new OutputterCtemplate("gamelist.tpl") );
+	op->addParameter("GAMENUMBER");
+	op->addParameter("GAMETYPE");
+	op->addParameter("GAMETYPE_NAME",oagametype);
+	op->addParameter("MAPNAME");
+	op->addParameter("BASEGAME");
+	op->addParameter("SERVERNAME");
+	op->addParameter("TIMESTAMP");
+	string output;
+	op->print(res,output);
+	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
+	ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
+	body_element->SetValue("ELEMENT_TITLE","Recent games");
+	body_element->SetValue("BODY_ELEMENT",output);
+	//last 10 matches - end
+	output2 = "";
+    ctemplate::ExpandTemplate("body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
+    response().out() << output2 << endl;
+}
 
 unsigned int OaStatWeb3::getNumberOfGames() {
 	unsigned int result = 0;

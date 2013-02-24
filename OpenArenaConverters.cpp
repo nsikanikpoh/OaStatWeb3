@@ -131,3 +131,47 @@ std::string OaWeaponConverter::getValue(std::string key) {
 	return key;
 }
 
+std::string OaGametypeConverter::getValue(std::string key) {
+	int gametype = atoi(key.c_str());
+	switch(gametype) {
+		case 0:
+			key = "Deathmatch";
+			break;
+		case 1:
+			key = "Tourney";
+			break;
+		case 3: 
+			key = "Team deathmatch";
+			break;
+		case 4:
+			key = "Capture the flag";
+			break;
+		case 5:
+			key = "One flag capture";
+			break;
+		case 6:
+			key = "Overload";
+			break;
+		case 7:
+			key = "Harvester";
+			break;
+		case 8:
+			key = "Elimination";
+			break;
+		case 9:
+			key = "Ctf elimination";
+			break;
+		case 10:
+			key = "Last man standing";
+			break;
+		case 11:
+			key = "Double domination";
+			break;
+		case 12:
+			key = "Domination";
+			break;
+			
+		
+	}
+	return key;
+}

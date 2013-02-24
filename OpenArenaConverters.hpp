@@ -15,5 +15,10 @@ public:
     virtual std::string getValue(std::string key);
 };
 
+class OaGametypeConverter : public BaseConverter {
+public:
+	virtual std::string getValue(std::string key);
+};
+
 #endif	/* OPENARENACONVERTERS_HPP */
 

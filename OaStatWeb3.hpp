@@ -49,6 +49,7 @@ public:
 	void onegame(std::string gamenumber);
 	void playerpage(std::string playerid);
 	void mappage(std::string mapname);
+	void gametypepage(std::string gametypeNumber);
 private:
 	unsigned int getNumberOfGames();
 	boost::shared_ptr<cppdb::session> sql;
@@ -60,6 +61,7 @@ private:
      */
 	void CheckConnection();
 	optconverter oaweapon;
+	optconverter oagametype;
 };
 
 #endif	/* OASTATWEB_HPP */
