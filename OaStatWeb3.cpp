@@ -36,6 +36,7 @@ for the parts of the skin/template used as well as that of the covered work.
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/url_mapper.h>
 #include <ctemplate/template_dictionary.h>
+#include <boost/algorithm/string.hpp>
 #include "boost/lexical_cast.hpp"
 #include <stdlib.h>
 #include <boost/format.hpp>
@@ -266,12 +267,12 @@ void OaStatWeb3::playerpage(std::string playerid) {
 
 void OaStatWeb3::mappage(std::string mapname) {
 	CheckConnection();
+	boost::algorithm::to_lower(mapname);
 	ctemplate::TemplateDictionary body_tpl("body.tpl");
 	body_tpl.SetValue("TITLE","Map - " + mapname);
 	body_tpl.SetValue("SUBTITLE","Map summary");
 	body_tpl.SetValue("ROOTPATH","..");
 	string output2 = "";
-	cout << "Mapname: " << mapname << endl;
 	//Map info start
 	{
 		ctemplate::TemplateDictionary map_tpl("map.tpl");
