@@ -29,8 +29,9 @@ for the parts of the skin/template used as well as that of the covered work.
 */
 
 #include "plotgenerator.hpp"
-#include "include/gnuplot_i.hpp"
 #include <sys/stat.h>
+#include <stdio.h>
+#include <sstream>
 
 using namespace boost;
 using namespace std;
@@ -61,6 +62,7 @@ plotgenerator::plotgenerator(boost::shared_ptr<cppdb::session>  parentsql)
 
 int plotgenerator::gamescoregraph(int gamenumber) {
 	boost::format filename("media/scoretable%1%.png");
+	stringstream script_data;
 	filename % gamenumber;
 	struct stat buffer;
 	if ( stat( filename.str().c_str(), &buffer ) == 0 ) return 1 ;
@@ -129,34 +131,41 @@ int plotgenerator::gamescoregraph(int gamenumber) {
 			}
 		}
 		
-		/*for(int i=0;i<playerids.size();i++) {
-			cout << playerids.at(i) << " " << names.at(i) << endl;
-		}
-		for(int i=0;i<table.size();i++) {
-			for(int j=0;j<table.at(i).size();j++) {
-				cout << table[i][j] << " ";
+		for (int i=0; i<playerids.size(); ++i) {
+			script_data << "\"" << names.at(i) << "\"\n";
+			for (int j=0; j<table.at(i).size(); ++j) {
+				script_data << table.at(0).at(j) << " " << table.at(i+1).at(j) << "\n";
 			}
-			cout << endl;
-		}*/
-		//Gnuplot::set_terminal_std("svg");
-		Gnuplot g1("lines");
-		g1.savetops("/dev/null");
-		g1.set_title("Score over time");
-		g1.set_xlabel("Time (seconds)");
-		g1.set_ylabel("Score");
-		g1.operator << ("set key left top" );
-		for(int i=0;i<playerids.size();i++) {
-			/*if(playerids.size()==i-1)
-				g1.savetops("test_output");*/
-			g1.plot_xy(table.at(0),table.at(i+1),names.at(i));
+			script_data << "\n\n";
 		}
-		g1.cmd("set terminal png");
-		boost::format set_output_filename("set output \"%1%.tmp\"");
-		set_output_filename % filename;
-		g1.cmd(set_output_filename.str());
-		g1.replot();
-		g1.remove_tmpfiles();
-		//g1.showonscreen();
+		char name[] = "/tmp/gnuplotXXXXXX"; // tmp file in /tmp
+		int fd = mkstemp(name);
+		FILE* filepointer = fdopen(fd, "w+");
+		if( filepointer == NULL) {
+			unlink(name);
+			return 3;
+		}
+		//cerr << "Data: " << script_data.str() << endl;
+		int retval = fputs(script_data.str().c_str(),filepointer);
+		if(retval >= 0) {
+			retval= fflush(filepointer);
+		}
+		if(retval < 0) {
+			unlink(name);
+			fclose(filepointer);
+			return 4;
+		}
+		boost::format system_gnuplot("./plot_script.gnuplot \"%1%\" \"%2%.tmp\" 2> /dev/null");
+		system_gnuplot % name % filename;
+		//cerr << "Calling: " << system_gnuplot.str() << endl;
+		int retcode = system(system_gnuplot.str().c_str());
+		unlink(name);
+		fclose(filepointer);
+		if(retcode) {
+			cerr << "gnuplot failed!" << endl;
+			return 5;
+		}
+		
 		
 	}
 	boost::format system_mv("mv \"%1%.tmp\" \"%1%\"");
