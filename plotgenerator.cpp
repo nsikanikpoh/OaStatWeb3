@@ -155,8 +155,8 @@ int plotgenerator::gamescoregraph(int gamenumber) {
 			fclose(filepointer);
 			return 4;
 		}
-		boost::format system_gnuplot("./plot_script.gnuplot \"%1%\" \"%2%.tmp\" 2> /dev/null");
-		system_gnuplot % name % filename;
+		boost::format system_gnuplot("./plot_script.gnuplot \"%1%\" \"%2%.tmp\" %3% 2> gnuplot.log");
+		system_gnuplot % name % filename % (playerids.size()-1);
 		//cerr << "Calling: " << system_gnuplot.str() << endl;
 		int retcode = system(system_gnuplot.str().c_str());
 		unlink(name);
