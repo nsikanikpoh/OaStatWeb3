@@ -1,6 +1,6 @@
 {{%AUTOESCAPE context="HTML"}}
 <table border="1">
-<tr><td>Weapon</td><td>Count</td></tr>
+<tr><th>Weapon</th><th>Count</th></tr>
 {{#ELEMENT}}
 <tr><td>{{WEAPON}}</td><td>{{COUNT}}</td></tr>
 {{/ELEMENT}}
