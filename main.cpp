@@ -38,7 +38,7 @@ for the parts of the skin/template used as well as that of the covered work.
 using namespace std;
 
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	try {
 		cppcms::service srv(argc,argv);

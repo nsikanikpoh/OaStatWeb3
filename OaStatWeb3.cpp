@@ -90,7 +90,7 @@ void OaStatWeb3::CheckConnection() {
 		//Execute some dummy sql:
 		result r = *sql<<"SELECT 'X'";
 		r.next();
-	} catch (...) {
+	} catch ( exception &e ) {
 		//if the dummy sql fails then reconnect
 		sql->open("mysql:database=oastat");
 	}
@@ -139,7 +139,6 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	op->addParameter("TIMESTAMP");
 	string output;
 	op->print(res,output);
-	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output,"BODY_ELEMENT_LIST");
 	ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
 	body_element->SetValue("ELEMENT_TITLE","Game list");
 	body_element->SetValue("BODY_ELEMENT",output);
@@ -147,11 +146,10 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	gamelist_stream.str(std::string());
 	gamelist_stream.clear();
 	gamelist_stream << "Go to page: <br/>";
-	for(int i=0;i<=numberOfGames/limitCount;++i) 
+	for (int i=0;i<=numberOfGames/limitCount;++i) 
 	{
 		gamelist_stream << "<a href='" << url("/gamelist",i*limitCount)  << "'>" << i+1  <<"</a> ";
 	}
-	//body_tpl.SetValueAndShowSection("BODY_ELEMENT",gamelist_stream.str(),"BODY_ELEMENT_LIST");
 	body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
 	body_element->SetValue("ELEMENT_TITLE","Pages");
 	body_element->SetValue("BODY_ELEMENT",gamelist_stream.str());

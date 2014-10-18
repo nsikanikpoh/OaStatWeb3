@@ -39,6 +39,8 @@ for the parts of the skin/template used as well as that of the covered work.
 class BaseConverter {
 public:
     virtual std::string getValue(std::string key) = 0;
+	
+	virtual ~BaseConverter() {};
 };
 
 typedef boost::shared_ptr<BaseConverter> optconverter;
@@ -69,6 +71,8 @@ public:
      * @param outstr The result of the print
      */
     virtual void print(cppdb::result &res, std::string &outstr) = 0;
+	
+	virtual ~BaseOutputter() {};
 };
 
 typedef boost::shared_ptr<BaseOutputter> optoutputter;

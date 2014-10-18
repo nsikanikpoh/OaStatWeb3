@@ -10,26 +10,15 @@ total: OaStatWeb3
 clean: 
 	rm -f *.o OaStatWeb3
 
-OaStatWeb3: main.o OaStatWeb3.o OutputterBasic.o OutputterCtemplate.o OpenArenaConverters.o plotgenerator.o
-	c++ -O -o OaStatWeb3 OaStatWeb3.o main.o OutputterBasic.o OutputterCtemplate.o OpenArenaConverters.o plotgenerator.o -lcppdb -lcppcms -lctemplate
+OASTAT_WEB_OFILES=main.o OaStatWeb3.o OutputterBasic.o OutputterCtemplate.o OpenArenaConverters.o plotgenerator.o
+OaStatWeb3: $(OASTAT_WEB_OFILES)
+	$(CXX) -O -o OaStatWeb3 $(OASTAT_WEB_OFILES) -lcppdb -lcppcms -lctemplate
 
-OaStatWeb3.o: OaStatWeb3.cpp
-	c++ $(BASE_CFLAGS) OaStatWeb3.cpp -o OaStatWeb3.o
-        
-#plotgenerator.o: plotgenerator.cpp plotgenerator.hpp
-#        c++ $(BASE_CFLAGS) plotgenerator.cpp -o plotgenerator.o
-        
-main.o: main.cpp
-	c++ $(BASE_CFLAGS) main.cpp -o main.o
+%.o : %.cpp
+	$(CXX) -MD ${BASE_CFLAGS} -o $@ $<
+	@mkdir -p .$(CROSS)deps; cp $*.d .$(CROSS)deps/$*.P; \
+             sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+                 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> .$(CROSS)deps/$*.P; \
+             rm -f $*.d
 
-OutputterBasic.o: OutputterBasic.cpp OutputterBasic.hpp
-	c++ $(BASE_CFLAGS) OutputterBasic.cpp -o OutputterBasic.o
-
-OutputterCtemplate.o: OutputterCtemplate.cpp OutputterCtemplate.hpp
-	c++ $(BASE_CFLAGS) OutputterCtemplate.cpp -o OutputterCtemplate.o
-
-OpenArenaConverters.o: OpenArenaConverters.cpp OpenArenaConverters.hpp
-	c++ $(BASE_CFLAGS) OpenArenaConverters.cpp -o OpenArenaConverters.o
-	
-plotgenerator.o: plotgenerator.cpp plotgenerator.hpp
-	c++ $(BASE_CFLAGS) plotgenerator.cpp -o plotgenerator.o
+-include .$(CROSS)deps/*.P
