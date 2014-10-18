@@ -63,6 +63,7 @@ private:
 	optconverter oaweapon;
 	optconverter oagametype;
 	std::string connection_string;
+	std::string static_media;
 };
 
 #endif	/* OASTATWEB_HPP */

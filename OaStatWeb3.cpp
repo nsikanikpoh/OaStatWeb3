@@ -72,6 +72,7 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 
     mapper().root("/oastatweb");
 	
+	static_media = this->settings().get("application.static_media","../static_media");
 	connection_string = this->settings().get("application.connection_string","mysql:database=oastat");
 	CheckConnection();
 	oaweapon = optconverter(new OaWeaponConverter());
@@ -277,6 +278,7 @@ void OaStatWeb3::mappage(std::string mapname) {
 	{
 		ctemplate::TemplateDictionary map_tpl("templates/map.tpl");
 		map_tpl.SetValue("MAPNAME",mapname);
+		map_tpl.SetValue("STATIC_MEDIA",static_media);
 		ctemplate::ExpandTemplate("templates/map.tpl", ctemplate::DO_NOT_STRIP, &map_tpl, &output2);
 		//body_tpl.SetValueAndShowSection("BODY_ELEMENT",output2,"BODY_ELEMENT_LIST");
 		ctemplate::TemplateDictionary* body_element = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
