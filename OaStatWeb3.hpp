@@ -62,6 +62,7 @@ private:
 	void CheckConnection();
 	optconverter oaweapon;
 	optconverter oagametype;
+	std::string connection_string;
 };
 
 #endif	/* OASTATWEB_HPP */

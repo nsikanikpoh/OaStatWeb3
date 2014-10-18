@@ -72,6 +72,7 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 
     mapper().root("/oastatweb");
 	
+	connection_string = this->settings().get("application.connection_string","mysql:database=oastat");
 	CheckConnection();
 	oaweapon = optconverter(new OaWeaponConverter());
 	oagametype = optconverter(new OaGametypeConverter());
@@ -84,7 +85,7 @@ OaStatWeb3::~OaStatWeb3()
 
 void OaStatWeb3::CheckConnection() {
 	if(!sql) {
-		sql = boost::shared_ptr<cppdb::session>(new cppdb::session("mysql:database=oastat"));
+		sql = boost::shared_ptr<cppdb::session>(new cppdb::session(connection_string));
 	}
 	try {
 		//Execute some dummy sql:
@@ -92,7 +93,7 @@ void OaStatWeb3::CheckConnection() {
 		r.next();
 	} catch ( exception &e ) {
 		//if the dummy sql fails then reconnect
-		sql->open("mysql:database=oastat");
+		sql->open(connection_string);
 	}
 }
 
@@ -161,6 +162,7 @@ void OaStatWeb3::gamelist(std::string startCount) {
 
 void OaStatWeb3::onegame(std::string gamenumber) {
 	int sgamenumber = atoi(gamenumber.c_str());
+	string media_path = this->settings().get("application.media_path","../media");
 	CheckConnection();
 	ctemplate::TemplateDictionary body_tpl("body.tpl");
 	body_tpl.SetValue("TITLE","Game summary");
@@ -192,7 +194,7 @@ void OaStatWeb3::onegame(std::string gamenumber) {
 	try {
 		plot->gamescoregraph(sgamenumber);
 		stringstream ss;
-		ss << "<img src=\"../media/scoretable" << sgamenumber << ".png\" alt=\"Scoregraph\"/>";
+		ss << "<img src=\""<< media_path <<"/scoretable" << sgamenumber << ".png\" alt=\"Scoregraph\"/>";
 		ctemplate::TemplateDictionary* score_graph = body_tpl.AddSectionDictionary("BODY_ELEMENT_LIST");
 		score_graph->SetValue("BODY_ELEMENT",ss.str());
 		score_graph->SetValue("ELEMENT_TITLE","Score graph");
