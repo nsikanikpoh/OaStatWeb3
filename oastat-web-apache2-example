@@ -1,0 +1,44 @@
+NameVirtualHost oastat.poulsander.com:80
+<VirtualHost oastat.poulsander.com:80>
+	ServerAdmin webmaster@localhost
+	ServerName oastat.poulsander.com
+
+	#Moung it. The port must match the in in config.js
+	SCGIMount /oastatweb 127.0.0.1:8081  
+
+	# The document root is not used unless you are hosting other solutions
+	DocumentRoot /home/oastat-web/oastat-web
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride All
+	</Directory>
+	# The media files and the static files. Location depends on setup.
+	# In this case a user names oastat-web has been created for the purpose. 
+	Alias /media "/home/oastat-web/oastat.oastatweb3/media"
+	Alias /oastatweb/media "/home/oastat-web/oastat.oastatweb3/media"
+	<Directory /home/oastat-web/oastat-web/media>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		allow from all
+	</Directory>
+	
+	Alias /static "/home/oastat-web/oastat.oastatweb3/static_media"
+	Alias /oastatweb/static "/home/oastat-web/oastat.oastatweb3/static_media"
+	<Directory /home/oastat-web/oastat-web/static_media>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+        </Directory>
+
+
+	ErrorLog /var/log/apache2/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog /var/log/apache2/access.log combined
+
+</VirtualHost>
