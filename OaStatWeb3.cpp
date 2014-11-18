@@ -32,6 +32,7 @@ for the parts of the skin/template used as well as that of the covered work.
 #include <cppcms/application.h>
 //#include <ctemplate/template_dictionary.h>  
 #include <cppcms/service.h>  
+#include <cppcms/http_request.h>
 #include <cppcms/http_response.h>
 #include <cppcms/url_dispatcher.h>
 #include <cppcms/url_mapper.h>
@@ -41,6 +42,7 @@ for the parts of the skin/template used as well as that of the covered work.
 #include <stdlib.h>
 #include <boost/format.hpp>
 #include <ctemplate/template.h>
+#include <string>
 //#include <c++/4.6/iosfwd>
 
 #include "Bases.hpp"
@@ -66,6 +68,9 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 	
 	dispatcher().assign("/gametype/(\\d+)", &OaStatWeb3::gametypepage, this, 1);
 	mapper().assign("gametype","/gametype/{1}");
+	
+	dispatcher().assign("/datasource/killsbyweapon", &OaStatWeb3::kills_by_weapon_s, this);
+	mapper().assign("killsbyweapon","/datasource/killsbyweapon");
 	
 	dispatcher().assign("/", &OaStatWeb3::summary, this);
     mapper().assign("/");
@@ -100,10 +105,11 @@ void OaStatWeb3::CheckConnection() {
 
 void OaStatWeb3::summary() {
 	CheckConnection();
-	ctemplate::TemplateDictionary body_tpl("templates/body.tpl");
+	ctemplate::TemplateDictionary body_tpl("templates/summary.tpl");
 	body_tpl.SetValue("TITLE","Summary page");
 	body_tpl.SetValue("SUBTITLE","OAstat data");
 	body_tpl.SetValue("ROOTPATH",".");
+	body_tpl.SetValue("STATIC_MEDIA",static_media);
     cppdb::result res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS W,COUNT(0) AS C "
 			"FROM oastat_kills k GROUP BY W ORDER BY C DESC";
     optoutputter op(new OutputterCtemplate("templates/list.tpl") );
@@ -116,14 +122,14 @@ void OaStatWeb3::summary() {
 	weapon_kills->SetValue("ELEMENT_TITLE","Kill types");
 	weapon_kills->SetValue("BODY_ELEMENT",output);
 	string output2 = "";
-    ctemplate::ExpandTemplate("templates/body.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
+    ctemplate::ExpandTemplate("templates/summary.tpl", ctemplate::DO_NOT_STRIP, &body_tpl, &output2);
     response().out() << output2 << endl;
 };
 
 void OaStatWeb3::gamelist(std::string startCount) {
 	CheckConnection();
 	unsigned int numberOfGames = getNumberOfGames();
-	const int limitCount = 50;
+	const unsigned int limitCount = 50;
 	ctemplate::TemplateDictionary body_tpl("templates/body.tpl");
 	body_tpl.SetValue("TITLE","Gamelist");
 	body_tpl.SetValue("SUBTITLE","Page");
@@ -148,7 +154,7 @@ void OaStatWeb3::gamelist(std::string startCount) {
 	gamelist_stream.str(std::string());
 	gamelist_stream.clear();
 	gamelist_stream << "Go to page: <br/>";
-	for (int i=0;i<=numberOfGames/limitCount;++i) 
+	for (unsigned int i=0;i<=numberOfGames/limitCount;++i) 
 	{
 		gamelist_stream << "<a href='" << url("/gamelist",i*limitCount)  << "'>" << i+1  <<"</a> ";
 	}
@@ -360,4 +366,44 @@ unsigned int OaStatWeb3::getNumberOfGames() {
 		res >> result;
 	}
 	return result;
+}
+
+void OaStatWeb3::kills_by_weapon_s() {
+	unsigned int gamenumber = 0;
+	string sord = "DESC";
+	//request().
+	string get_gamenumber = request().get("gamenumber");
+	string get_sord = request().get("sord");
+	string get_sidx = request().get("sidx");
+	unsigned int sidx = 2;
+	if (get_gamenumber.length()) {
+		gamenumber = stoul(get_gamenumber);
+	}
+	if (get_sord == "ASC") {
+		sord = "ASC";
+	}
+	if (get_sidx.length()) {
+		sidx = stoul(get_sidx);
+	}
+	cppdb::result res;
+	if (gamenumber == 0) {
+		res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS w,COUNT(0) AS c FROM oastat_kills k GROUP BY w ORDER BY ? "+sord<<sidx;
+	}
+	else {
+		res = *sql<<"SELECT CASE k.MODTYPE WHEN 5 THEN 4 WHEN 7 THEN 6 WHEN 9 THEN 8 WHEN 13 THEN 12 ELSE k.MODTYPE END AS w,COUNT(0) AS c FROM oastat_kills k WHERE gamenumber = ? GROUP BY w ORDER BY ? "+sord<<gamenumber<<sidx;
+	}
+	response().out() << "{\"rows\":[";
+	bool first = true;
+	while (res.next()) {
+		if (!first) {
+			response().out() << "," << endl;
+		}
+		first = false;
+		unsigned int w;
+		unsigned int c;
+		res >> w;
+		res >> c;
+		response().out() << "{\"id\":\"" << w << "\",\"cell\":[\"" << w << "\",\"" << c << "\"]}";
+	}
+	response().out() << "]}";
 }

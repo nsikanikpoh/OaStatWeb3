@@ -50,6 +50,7 @@ public:
 	void playerpage(std::string playerid);
 	void mappage(std::string mapname);
 	void gametypepage(std::string gametypeNumber);
+	void kills_by_weapon_s();
 private:
 	unsigned int getNumberOfGames();
 	boost::shared_ptr<cppdb::session> sql;
