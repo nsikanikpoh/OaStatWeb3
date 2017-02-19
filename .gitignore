@@ -1,0 +1,7 @@
+*.o
+.*
+*~
+*.log
+nbproject
+OaStatWeb3
+!.gitignore
