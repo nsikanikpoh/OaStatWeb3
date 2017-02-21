@@ -1,5 +1,5 @@
 #!/bin/bash
-gnuplot << EOF
+gnuplot -e "logfile='/tmp/gnuplotlogfile.log'" << EOF
 set terminal png
 set output "$2"
 set title "Score over time"
