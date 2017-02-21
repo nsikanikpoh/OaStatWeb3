@@ -46,7 +46,7 @@ void OutputterBasic::addParameter(std::string p, optconverter &c) {
 
 void OutputterBasic::print(cppdb::result &res, std::string &outstr) {
 	while(res.next()) {
-		for(int i=0;i<parameters.size();i++) {
+		for(size_t i=0;i<parameters.size();i++) {
 			string tmp;
 			res >> tmp;
 			cout << parameters.at(i) << ": " << ( converters.at(i) ? converters.at(i)->getValue(tmp) : tmp ) << ", ";

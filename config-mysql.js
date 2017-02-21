@@ -2,8 +2,8 @@
    "application" : {
       // user specific data
       "connection_string" : "mysql:database=oastat;user=testuser;password='password'",
-      "media_path" : "../../files/media",
-      "static_media" : "../../files/static"
+      "media_path" : "../media",
+      "static_media" : "../static"
    },
     "service" : {
         "api" : "http",

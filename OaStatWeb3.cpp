@@ -79,6 +79,11 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 	
 	static_media = this->settings().get("application.static_media","../static_media");
 	connection_string = this->settings().get("application.connection_string","mysql:database=oastat");
+	//It has become popular to give settings using environments
+	const char* env_connection_string = getenv("OASTATWEB3CONNECTIONSTRING");
+	if (env_connection_string) {
+		connection_string = env_connection_string;
+	}
 	CheckConnection();
 	oaweapon = optconverter(new OaWeaponConverter());
 	oagametype = optconverter(new OaGametypeConverter());

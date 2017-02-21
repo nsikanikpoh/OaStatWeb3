@@ -40,7 +40,7 @@ using namespace std;
 
 namespace {
 
-const char* VALIDCHARS ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789^*_-}{[]()#@.,/ +!:";
+const char* VALIDCHARS ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*_-}{[]()#@.,/ +!:";
 
 void cleanString(string &str) {
 	size_t found;
@@ -96,7 +96,7 @@ int plotgenerator::gamescoregraph(int gamenumber) {
 	if(playerids_str.length()) {
 		vector< vector<int> > table;
 		//table.push_back(currentscore);
-		for(int i=0; i<playerids.size()+1;i++) {
+		for(size_t i=0; i<playerids.size()+1;i++) {
 			vector<int> acoloumn;
 			acoloumn.push_back(0);
 			table.push_back(acoloumn);
@@ -109,31 +109,31 @@ int plotgenerator::gamescoregraph(int gamenumber) {
 			if(currentscore[0] == second)
 				//table.pop_back(); //Only have one entry per second, remove the oldest one
 			{
-				for(int i=0; i<playerids.size()+1;i++)
+				for(size_t i=0; i<playerids.size()+1;i++)
 					table.at(i).pop_back();
 			}
 			currentscore[0] = second; //time
-			for(int i=0; i<playerids.size();i++) {
+			for(size_t i=0; i<playerids.size();i++) {
 				if(playerids.at(i) == playerid ) {
 					currentscore.at(i+1) = score;
 				}
 			}
 			//table.push_back(currentscore);
-			for(int i=0; i<playerids.size()+1;i++) {
+			for(size_t i=0; i<playerids.size()+1;i++) {
 				table.at(i).push_back(currentscore.at(i));
 			}
 		}
 		if(table.at(0).back() != second) {
 			finalscore[0] = second;
 			//table.push_back(finalscore);
-			for(int i=0; i<playerids.size()+1;i++) {
+			for(size_t i=0; i<playerids.size()+1;i++) {
 				table.at(i).push_back(finalscore.at(i));
 			}
 		}
 		
-		for (int i=0; i<playerids.size(); ++i) {
+		for (size_t i=0; i<playerids.size(); ++i) {
 			script_data << "\"" << names.at(i) << "\"\n";
-			for (int j=0; j<table.at(i).size(); ++j) {
+			for (size_t j=0; j<table.at(i).size(); ++j) {
 				script_data << table.at(0).at(j) << " " << table.at(i+1).at(j) << "\n";
 			}
 			script_data << "\n\n";

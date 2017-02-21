@@ -1,8 +1,8 @@
 #Compile with debug information or optimized.
 ifeq ($(DEBUG),1)
-BASE_CFLAGS += -c -g -DDEBUG=1 -Wall -std=c++0x
+BASE_CFLAGS += -c -g -DDEBUG=1 -Wall -std=c++11
 else
-BASE_CFLAGS += -c -O3 -Wall -std=c++0x
+BASE_CFLAGS += -c -O3 -Wall -std=c++11
 endif
 
 total: OaStatWeb3
