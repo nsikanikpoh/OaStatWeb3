@@ -34,7 +34,6 @@ for the parts of the skin/template used as well as that of the covered work.
 #include <cppcms/application.h>
 #include <boost/format.hpp>
 #include <cppdb/frontend.h>
-#include <boost/shared_ptr.hpp>
 #include "OpenArenaConverters.hpp"
 #include "plotgenerator.hpp"
 
@@ -53,8 +52,8 @@ public:
 	void kills_by_weapon_s();
 private:
 	unsigned int getNumberOfGames();
-	boost::shared_ptr<cppdb::session> sql;
-	boost::shared_ptr<plotgenerator> plot;
+	std::shared_ptr<cppdb::session> sql;
+	std::shared_ptr<plotgenerator> plot;
 	/**
 	 * Checks to see if the connection is still alive. If it is not then reopen the connection.
 	 * This function should be called by all pages in the beginning to ensure that the connection is alive.

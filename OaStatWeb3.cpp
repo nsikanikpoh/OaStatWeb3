@@ -87,7 +87,7 @@ OaStatWeb3::OaStatWeb3(cppcms::service &srv) : cppcms::application(srv)
 	CheckConnection();
 	oaweapon = optconverter(new OaWeaponConverter());
 	oagametype = optconverter(new OaGametypeConverter());
-	plot = boost::shared_ptr<plotgenerator>(new plotgenerator(sql));
+	plot = std::shared_ptr<plotgenerator>(new plotgenerator(sql));
 }
 
 OaStatWeb3::~OaStatWeb3()
@@ -96,7 +96,7 @@ OaStatWeb3::~OaStatWeb3()
 
 void OaStatWeb3::CheckConnection() {
 	if(!sql) {
-		sql = boost::shared_ptr<cppdb::session>(new cppdb::session(connection_string));
+		sql = std::shared_ptr<cppdb::session>(new cppdb::session(connection_string));
 	}
 	try {
 		//Execute some dummy sql:

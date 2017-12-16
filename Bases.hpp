@@ -34,7 +34,6 @@ for the parts of the skin/template used as well as that of the covered work.
 #include <iostream>
 #include <cppdb/frontend.h>
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 
 class BaseConverter {
 public:
@@ -43,7 +42,7 @@ public:
 	virtual ~BaseConverter() {};
 };
 
-typedef boost::shared_ptr<BaseConverter> optconverter;
+typedef std::shared_ptr<BaseConverter> optconverter;
 
 
 class BaseOutputter {

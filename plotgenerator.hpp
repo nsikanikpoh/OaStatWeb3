@@ -40,11 +40,11 @@ for the parts of the skin/template used as well as that of the covered work.
 class plotgenerator
 {
 public:
-	plotgenerator(boost::shared_ptr<cppdb::session> parentsql);
+	plotgenerator(std::shared_ptr<cppdb::session> parentsql);
 	
 	int gamescoregraph(int gamenumber);
 private:
-	boost::shared_ptr<cppdb::session> sql;
+	std::shared_ptr<cppdb::session> sql;
 };
 
 #endif	/* PLOTGENERATOR_HPP */

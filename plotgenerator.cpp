@@ -55,7 +55,7 @@ void cleanString(string &str) {
 
 }
 
-plotgenerator::plotgenerator(boost::shared_ptr<cppdb::session>  parentsql)
+plotgenerator::plotgenerator(std::shared_ptr<cppdb::session>  parentsql)
 {
 	sql = parentsql;
 }
